@@ -82,3 +82,13 @@ The SDK maps Firebase errors to specific exceptions:
 *   `EmailAlreadyInUseException`: Email already registered.
 *   `WeakPasswordException`: Password is too weak.
 *   `NetworkException`: Network connectivity issues.
+
+##Screenshot
+
+
+<img width="75" height="150" alt="pc1" src="https://github.com/user-attachments/assets/365fdafb-806c-45c9-91fe-87a207a7784f?raw=true" />
+<img width="85" height="153" alt="pc2" src="https://github.com/user-attachments/assets/491280a4-c375-4c26-b9cb-30f54fe4af92?raw=true" />
+<img width="89" height="151" alt="pc3" src="https://github.com/user-attachments/assets/feede630-104c-422e-85bc-d2e4a86fa1dc?raw=true" />
+
+
+

@@ -9,11 +9,10 @@ class DefaultModePage extends StatefulWidget {
 }
 
 class _DefaultModePageState extends State<DefaultModePage> {
-  // Use MockAuthService for demonstration to avoid Firebase setup requirements for the user.
-  // In production, use FirebaseAuthService().
+
   final AuthService _authService = MockAuthService();
   
-  // Example configuration
+
   final AuthConfig _authConfig = const AuthConfig(
     enableEmailPassword: true,
     enableGoogle: true,
@@ -63,3 +62,4 @@ class _DefaultModePageState extends State<DefaultModePage> {
     );
   }
 }
+//
