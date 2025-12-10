@@ -34,7 +34,7 @@ class _HeadlessModePageState extends State<HeadlessModePage> {
         email: _emailController.text,
         password: _passwordController.text,
       );
-      // Success is handled by stream listener typically, but we can also set message here
+
       _statusMessage = "Sign In Call Completed";
     } on AuthException catch (e) {
       setState(() {

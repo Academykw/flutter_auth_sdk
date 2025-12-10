@@ -5,8 +5,7 @@ import 'headless_mode_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // In a real app with Firebase, you would call Firebase.initializeApp() here.
-  // For this example with MockService, it's not strictly necessary but good practice to show where it goes.
+
   runApp(const MyApp());
 }
 
