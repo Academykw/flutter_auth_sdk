@@ -1,4 +1,4 @@
-/// Custom exception utility for Auth SDK
+
 library auth_exception;
 
 /// Base class for all Auth SDK specific exceptions

@@ -10,7 +10,6 @@ class AuthConfig {
   final bool enableApple;
 
   /// Optional: Common configuration for specific providers can be added here
-  
   const AuthConfig({
     this.enableEmailPassword = true,
     this.enableGoogle = false,

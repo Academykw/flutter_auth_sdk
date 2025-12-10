@@ -26,8 +26,7 @@ class FirebaseAuthService implements AuthService {
 
   AuthState _mapFirebaseUserToAuthState(User? user) {
     if (user != null) {
-      // Check for token expiration could be done by forcing a token refresh, 
-      // but standard stream usually handles it.
+
       return AuthState.authenticated(user);
     }
     return AuthState.unauthenticated();
@@ -35,7 +34,7 @@ class FirebaseAuthService implements AuthService {
 
   @override
   Future<void> initialize(AuthConfig config) async {
-    // Config not currently used in service layer, but available for future validation
+
   }
 
   @override
@@ -90,7 +89,7 @@ class FirebaseAuthService implements AuthService {
 
   @override
   Future<void> signInWithApple() async {
-    // TODO: Implement Apple Sign In when package is fully integrated and tested
+
     throw UnimplementedError('Apple Sign In not yet implemented in this version.');
   }
 
