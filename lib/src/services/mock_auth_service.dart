@@ -1,8 +1,8 @@
+
+
 import 'dart:async';
-import '../core/auth_config.dart';
-import '../core/auth_exception.dart';
-import '../core/auth_state.dart';
-import 'auth_service_contract.dart';
+
+import '../../flutter_firebase_auth_sdk.dart';
 
 class MockAuthService implements AuthService {
   final StreamController<AuthState> _authStateController =
@@ -10,8 +10,7 @@ class MockAuthService implements AuthService {
   
   AuthState _currentUser = AuthState.unauthenticated();
   
-  // Users for testing
-  final Map<String, String> _mockUsers = {
+   final Map<String, String> _mockUsers = {
     'test@example.com': 'password',
   };
 
@@ -27,8 +26,7 @@ class MockAuthService implements AuthService {
 
   @override
   Future<void> initialize(AuthConfig config) async {
-    // Mock init
-    await Future.delayed(const Duration(milliseconds: 100));
+     await Future.delayed(const Duration(milliseconds: 100));
   }
 
   @override
