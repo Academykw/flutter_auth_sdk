@@ -1,0 +1,23 @@
+name: flutter_firebase_auth_sdk
+description: A reusable Authentication SDK powered by Firebase with pre-built UI and headless mode.
+version: 0.0.1
+
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.0.0"
+homepage: https://example.com
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_auth: ^4.10.0
+  google_sign_in: ^6.1.0
+  # sign_in_with_apple: ^5.0.0 # Temporarily disabled due to build issues on some environments
+  firebase_core: ^2.17.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
