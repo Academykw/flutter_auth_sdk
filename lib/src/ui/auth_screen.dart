@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../flutter_firebase_auth_sdk.dart';
 import '../core/auth_config.dart';
 import '../core/auth_exception.dart';
 import '../services/auth_service_contract.dart';
