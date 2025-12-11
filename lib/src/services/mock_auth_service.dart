@@ -1,8 +1,9 @@
-
-
 import 'dart:async';
-
-import '../../flutter_firebase_auth_sdk.dart';
+import '../core/auth_config.dart';
+import '../core/auth_exception.dart';
+import '../core/auth_state.dart';
+import '../core/auth_validator.dart';
+import 'auth_service_contract.dart';
 
 class MockAuthService implements AuthService {
   final StreamController<AuthState> _authStateController =
@@ -10,7 +11,8 @@ class MockAuthService implements AuthService {
   
   AuthState _currentUser = AuthState.unauthenticated();
   
-   final Map<String, String> _mockUsers = {
+  // Users for testing
+  final Map<String, String> _mockUsers = {
     'test@example.com': 'password',
   };
 
@@ -26,7 +28,8 @@ class MockAuthService implements AuthService {
 
   @override
   Future<void> initialize(AuthConfig config) async {
-     await Future.delayed(const Duration(milliseconds: 100));
+    // Mock init
+    await Future.delayed(const Duration(milliseconds: 100));
   }
 
   @override
@@ -36,6 +39,8 @@ class MockAuthService implements AuthService {
   }) async {
     await Future.delayed(const Duration(milliseconds: 500));
     
+    AuthValidator.validateEmail(email);
+
     if (_mockUsers.containsKey(email)) {
       if (_mockUsers[email] == password) {
         _updateState(AuthState.authenticated({'email': email, 'uid': 'mock-uid-123'}));
@@ -55,13 +60,13 @@ class MockAuthService implements AuthService {
   }) async {
     await Future.delayed(const Duration(milliseconds: 500));
     
+    AuthValidator.validateEmail(email);
+
     if (_mockUsers.containsKey(email)) {
       throw const EmailAlreadyInUseException();
     }
     
-    if (password.length < 6) {
-      throw const WeakPasswordException(message: 'Password must be at least 6 characters.');
-    }
+    AuthValidator.validatePassword(password);
 
     _mockUsers[email] = password;
     _updateState(AuthState.authenticated({'email': email, 'uid': 'mock-uid-new-${DateTime.now().millisecondsSinceEpoch}'}));
