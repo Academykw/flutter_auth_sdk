@@ -28,165 +28,156 @@ dependencies:
 ## Usage
 
 ### 1. Default Mode (Pre-built UI)
-
-```dart
 import 'package:flutter_firebase_auth_sdk/flutter_firebase_auth_sdk.dart';
-
 // ...
-
 AuthScreen(
-config: AuthConfig(
-enableEmailPassword: true,
-enableGoogle: true,
-enableApple: true,
-),
-authService: FirebaseAuthService(), // Or MockAuthService() for testing
-onAuthSuccess: () {
-print("User authenticated!");
-},
+  config: AuthConfig(
+    enableEmailPassword: true,
+    enableGoogle: true,
+    enableApple: true,
+  ),
+  authService: FirebaseAuthService(), // Or MockAuthService() for testing
+  onAuthSuccess: () {
+    print("User authenticated!");
+  },
 );
-```
 
-### 2. Headless Mode (Custom UI)
+// ### 2. Headless Mode (Custom UI)
 
 ```dart
 final authService = FirebaseAuthService();
 
 // Sign In
 try {
-await authService.signInWithEmailAndPassword(
-email: 'test@example.com',
-password: 'password'
-);
+  await authService.signInWithEmailAndPassword(
+    email: 'test@example.com',
+    password: 'password'
+  );
 } on AuthException catch (e) {
-print(e.message);
+  print(e.message);
 }
 
 // Listen to state
 StreamBuilder<AuthState>(
-stream: authService.authStateChanges,
-builder: (context, snapshot) {
-if (snapshot.data?.status == AuthStatus.authenticated) {
-return HomePage();
-}
-return LoginPage();
-},
+  stream: authService.authStateChanges,
+  builder: (context, snapshot) {
+    if (snapshot.data?.status == AuthStatus.authenticated) {
+      return HomePage();
+    }
+    return LoginPage();
+  },
 );
 ```
 
 ## Error Handling
-
-
 ##  Flexible Error Handling - Your Way!
-
-This SDK gives you **complete control** over how you handle authentication errors. Every error includes rich metadata so you can customize your error handling exactly how you want.
+This SDK gives you **complete control** over how you handle authentication errors. 
+Every error includes rich metadata so you can customize your error handling exactly how you want.
 
 ### What You Get With Every Error
 
 ```dart
 try {
-await authService.signInWithEmail(email: email, password: password);
+  await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
-// Access rich error information
-print(e.errorType);        // AuthErrorType enum (invalid_email, weak_password, etc.)
-print(e.severity);         // AuthErrorSeverity (critical, error, warning, info)
-print(e.message);          // User-friendly message
-print(e.code);             // Error code for programmatic handling
-print(e.originalError);    // Original Firebase error
-print(e.metadata);         // Additional context
-print(e.stackTraceString); // Full stack trace
+  // Access rich error information
+  print(e.errorType);        // AuthErrorType enum (invalid_email, weak_password, etc.)
+  print(e.severity);         // AuthErrorSeverity (critical, error, warning, info)
+  print(e.message);          // User-friendly message
+  print(e.code);             // Error code for programmatic handling
+  print(e.originalError);    // Original Firebase error
+  print(e.metadata);         // Additional context
+  print(e.stackTraceString); // Full stack trace
 }
 ```
-
 ### Handle Errors YOUR Way
-
 **1. Show a Dialog**
+
 ```dart
 try {
-await authService.signInWithEmail(email: email, password: password);
+  await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
-showDialog(
-context: context,
-builder: (context) => AlertDialog(
-title: Text('Authentication Error'),
-content: Text(e.message),
-actions: [
-TextButton(
-onPressed: () => Navigator.pop(context),
-child: Text('OK'),
-),
-],
-),
-);
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Authentication Error'),
+      content: Text(e.message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('OK'),
+        ),
+      ],
+    ),
+  );
 }
 ```
-
 **2. Show a Snackbar**
 ```dart
 try {
-await authService.signInWithEmail(email: email, password: password);
+  await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
-ScaffoldMessenger.of(context).showSnackBar(
-SnackBar(
-content: Text(e.message),
-backgroundColor: e.severity == AuthErrorSeverity.critical
-? Colors.red
-: Colors.orange,
-),
-);
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(e.message),
+      backgroundColor: e.severity == AuthErrorSeverity.critical
+        ? Colors.red
+        : Colors.orange,
+    ),
+  );
 }
 ```
 
 **3. Show a Bottom Sheet**
 ```dart
 try {
-await authService.signInWithEmail(email: email, password: password);
+  await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
-showModalBottomSheet(
-context: context,
-builder: (context) => Container(
-padding: EdgeInsets.all(16),
-child: Column(
-mainAxisSize: MainAxisSize.min,
-children: [
-Icon(Icons.error_outline, size: 48, color: Colors.red),
-SizedBox(height: 16),
-Text(e.message, style: TextStyle(fontSize: 16)),
-SizedBox(height: 16),
-ElevatedButton(
-onPressed: () => Navigator.pop(context),
-child: Text('Got it'),
-),
-],
-),
-),
-);
+  showModalBottomSheet(
+    context: context,
+    builder: (context) => Container(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.error_outline, size: 48, color: Colors.red),
+          SizedBox(height: 16),
+          Text(e.message, style: TextStyle(fontSize: 16)),
+          SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Got it'),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 ```
 
 **4. Custom Toast/Banner**
 ```dart
 try {
-await authService.signInWithEmail(email: email, password: password);
+  await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
-// Use your favorite toast library
-Fluttertoast.showToast(
-msg: e.message,
-backgroundColor: e.severity == AuthErrorSeverity.critical ? Colors.red : Colors.orange,
-);
+  // Use your favorite toast library
+  Fluttertoast.showToast(
+    msg: e.message,
+    backgroundColor: e.severity == AuthErrorSeverity.critical ? Colors.red : Colors.orange,
+  );
 }
 ```
 
 **5. Navigate to Error Page**
 ```dart
 try {
-await authService.signInWithEmail(email: email, password: password);
+  await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
-Navigator.push(
-context,
-MaterialPageRoute(
-builder: (context) => ErrorPage(exception: e),
-),
-);
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ErrorPage(exception: e),
+    ),
+  );
 }
 ```
