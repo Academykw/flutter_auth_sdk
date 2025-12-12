@@ -4,6 +4,7 @@ import '../core/auth_config.dart';
 import '../core/auth_exception.dart' as app_exception;
 import '../core/auth_state.dart';
 import '../core/auth_validator.dart';
+import '../core/auth_error_handler.dart';
 import 'auth_service_contract.dart';
 
 class FirebaseAuthService implements AuthService {
@@ -27,24 +28,20 @@ class FirebaseAuthService implements AuthService {
 
   AuthState _mapFirebaseUserToAuthState(User? user) {
     if (user != null) {
-      // Check for token expiration could be done by forcing a token refresh, 
-      // but standard stream usually handles it.
       return AuthState.authenticated(user);
     }
     return AuthState.unauthenticated();
   }
 
   @override
-  Future<void> initialize(AuthConfig config) async {
-    // Config not currently used in service layer, but available for future validation
-  }
+  Future<void> initialize(AuthConfig config) async {}
 
   @override
   Future<void> signInWithEmailAndPassword({
     required String email,
     required String password,
+    AuthErrorHandler? errorHandler,
   }) async {
-    // Validate email client-side first
     AuthValidator.validateEmail(email);
 
     try {
@@ -52,8 +49,16 @@ class FirebaseAuthService implements AuthService {
         email: email,
         password: password,
       );
-    } catch (e) {
-      throw _mapFirebaseError(e);
+    } catch (e, stackTrace) {
+      final authException = _mapFirebaseError(e, stackTrace);
+      if (errorHandler != null) {
+        errorHandler.handleError(authException);
+        if (errorHandler.shouldRethrow) {
+          throw authException;
+        }
+      } else {
+        throw authException;
+      }
     }
   }
 
@@ -61,8 +66,8 @@ class FirebaseAuthService implements AuthService {
   Future<void> signUpWithEmailAndPassword({
     required String email,
     required String password,
+    AuthErrorHandler? errorHandler,
   }) async {
-    // Validate password client-side first
     AuthValidator.validateEmail(email);
     AuthValidator.validatePassword(password);
 
@@ -71,17 +76,32 @@ class FirebaseAuthService implements AuthService {
         email: email,
         password: password,
       );
-    } catch (e) {
-      throw _mapFirebaseError(e);
+    } catch (e, stackTrace) {
+      final authException = _mapFirebaseError(e, stackTrace);
+      if (errorHandler != null) {
+        errorHandler.handleError(authException);
+        if (errorHandler.shouldRethrow) {
+          throw authException;
+        }
+      } else {
+        throw authException;
+      }
     }
   }
 
   @override
-  Future<void> signInWithGoogle() async {
+  Future<void> signInWithGoogle({
+    AuthErrorHandler? errorHandler,
+  }) async {
     try {
+      try {
+        await _googleSignIn.disconnect();
+      } catch (_) {
+        await _googleSignIn.signOut();
+      }
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        // User cancelled
         return;
       }
       final GoogleSignInAuthentication googleAuth =
@@ -91,49 +111,163 @@ class FirebaseAuthService implements AuthService {
         idToken: googleAuth.idToken,
       );
       await _firebaseAuth.signInWithCredential(credential);
-    } catch (e) {
-      throw _mapFirebaseError(e);
+    } catch (e, stackTrace) {
+      final authException = _mapFirebaseError(e, stackTrace);
+      if (errorHandler != null) {
+        errorHandler.handleError(authException);
+        if (errorHandler.shouldRethrow) {
+          throw authException;
+        }
+      } else {
+        throw authException;
+      }
     }
   }
 
   @override
-  Future<void> signInWithApple() async {
-    // TODO: Implement Apple Sign In when package is fully integrated and tested
-    throw UnimplementedError('Apple Sign In not yet implemented in this version.');
+  Future<void> signInWithApple({
+    AuthErrorHandler? errorHandler,
+  }) async {
+    throw UnimplementedError(
+        'Apple Sign In not yet implemented in this version.');
   }
 
   @override
-  Future<void> signOut() async {
+  Future<void> signOut({
+    AuthErrorHandler? errorHandler,
+  }) async {
     try {
       await Future.wait([
         _firebaseAuth.signOut(),
-        // Only sign out of google if we are signed in or just always try
-        _googleSignIn.signOut(),
+        _googleSignIn.disconnect(),
       ]);
-    } catch (e) {
-      throw _mapFirebaseError(e);
+    } catch (e, stackTrace) {
+      final authException = _mapFirebaseError(e, stackTrace);
+      if (errorHandler != null) {
+        errorHandler.handleError(authException);
+        if (errorHandler.shouldRethrow) {
+          throw authException;
+        }
+      } else {
+        throw authException;
+      }
     }
   }
 
-  Exception _mapFirebaseError(dynamic error) {
+  @override
+  Future<AuthResult<void>> signInWithEmailAndPasswordResult({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await signInWithEmailAndPassword(email: email, password: password);
+      return const AuthResult.success(null);
+    } on app_exception.AuthException catch (e) {
+      return AuthResult.failure(e);
+    }
+  }
+
+  @override
+  Future<AuthResult<void>> signUpWithEmailAndPasswordResult({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await signUpWithEmailAndPassword(email: email, password: password);
+      return const AuthResult.success(null);
+    } on app_exception.AuthException catch (e) {
+      return AuthResult.failure(e);
+    }
+  }
+
+  @override
+  Future<AuthResult<void>> signInWithGoogleResult() async {
+    try {
+      await signInWithGoogle();
+      return const AuthResult.success(null);
+    } on app_exception.AuthException catch (e) {
+      return AuthResult.failure(e);
+    }
+  }
+
+  @override
+  Future<AuthResult<void>> signInWithAppleResult() async {
+    try {
+      await signInWithApple();
+      return const AuthResult.success(null);
+    } on app_exception.AuthException catch (e) {
+      return AuthResult.failure(e);
+    }
+  }
+
+  app_exception.AuthException _mapFirebaseError(
+    dynamic error,
+    StackTrace stackTrace,
+  ) {
     if (error is FirebaseAuthException) {
+      final metadata = {
+        'firebaseCode': error.code,
+        'firebaseMessage': error.message,
+        'email': error.email,
+        'credential': error.credential?.toString(),
+      };
+
       switch (error.code) {
         case 'user-not-found':
-          return app_exception.UserNotFoundException(message: error.message);
+          return app_exception.UserNotFoundException(
+            message: error.message,
+            originalError: error,
+            metadata: metadata,
+            stackTrace: stackTrace,
+          );
         case 'wrong-password':
-          return app_exception.InvalidCredentialsException(message: error.message);
+          return app_exception.InvalidCredentialsException(
+            message: error.message,
+            originalError: error,
+            metadata: metadata,
+            stackTrace: stackTrace,
+          );
         case 'invalid-email':
-          return const app_exception.InvalidCredentialsException(message: 'Invalid email address.');
+          return app_exception.InvalidCredentialsException(
+            message: 'Invalid email address.',
+            originalError: error,
+            metadata: metadata,
+            stackTrace: stackTrace,
+          );
         case 'email-already-in-use':
-          return const app_exception.EmailAlreadyInUseException(message: 'The account already exists for that email.');
+          return app_exception.EmailAlreadyInUseException(
+            message: 'The account already exists for that email.',
+            originalError: error,
+            metadata: metadata,
+            stackTrace: stackTrace,
+          );
         case 'weak-password':
-          return app_exception.WeakPasswordException(message: error.message);
+          return app_exception.WeakPasswordException(
+            message: error.message,
+            originalError: error,
+            metadata: metadata,
+            stackTrace: stackTrace,
+          );
         case 'network-request-failed':
-          return app_exception.NetworkException(message: error.message);
+          return app_exception.NetworkException(
+            message: error.message,
+            originalError: error,
+            metadata: metadata,
+            stackTrace: stackTrace,
+          );
         default:
-          return app_exception.AuthUnknownException(error.message ?? 'Unknown error', originalError: error);
+          return app_exception.AuthUnknownException(
+            error.message ?? 'Unknown error',
+            originalError: error,
+            metadata: metadata,
+            stackTrace: stackTrace,
+          );
       }
     }
-    return app_exception.AuthUnknownException('An unknown error occurred', originalError: error);
+    return app_exception.AuthUnknownException(
+      'An unknown error occurred',
+      originalError: error,
+      stackTrace: stackTrace,
+    );
   }
 }

@@ -1,5 +1,6 @@
+import 'package:arc_firebase_auth_sdk/arc_firebase_auth_sdk.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_auth_sdk/flutter_firebase_auth_sdk.dart';
+
 
 class DefaultModePage extends StatefulWidget {
   const DefaultModePage({super.key});
@@ -15,7 +16,7 @@ class _DefaultModePageState extends State<DefaultModePage> {
 
   final AuthConfig _authConfig = const AuthConfig(
     enableEmailPassword: true,
-    enableGoogle: true,
+    enableGoogle: false,
     enableApple: true,
   );
 
@@ -62,4 +63,3 @@ class _DefaultModePageState extends State<DefaultModePage> {
     );
   }
 }
-//

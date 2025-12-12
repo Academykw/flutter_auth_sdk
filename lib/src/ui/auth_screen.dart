@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/auth_config.dart';
 import '../core/auth_exception.dart';
 import '../services/auth_service_contract.dart';
+import '../services/mock_auth_service.dart';
 
 class AuthScreen extends StatefulWidget {
   final AuthConfig config;
@@ -79,6 +80,52 @@ class _AuthScreenState extends State<AuthScreen> {
         _isLoading = true;
         _errorMessage = null;
       });
+      
+      // Check if we are using MockAuthService and simulate picker
+      if (widget.authService is MockAuthService) {
+        final selectedAccount = await showDialog<String>(
+          context: context,
+          builder: (context) => SimpleDialog(
+            title: const Text('Choose an account'),
+            children: [
+              for (var i = 1; i <= 5; i++)
+                SimpleDialogOption(
+                  onPressed: () {
+                    Navigator.pop(context, 'user$i@gmail.com');
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      children: [
+                        const CircleAvatar(
+                          backgroundColor: Colors.blue,
+                          child: Text('U', style: TextStyle(color: Colors.white)),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Mock User $i', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text('user$i@gmail.com', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+        
+        // If user cancelled dialog, stop here
+        if (selectedAccount == null) {
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+      }
+
       await widget.authService.signInWithGoogle();
       widget.onAuthSuccess?.call();
     } on AuthException catch (e) {

@@ -23,6 +23,7 @@ dependencies:
 
 2.  (Optional) For full Firebase support, ensure you have configured your Flutter app with Firebase:
     *   [Add Firebase to your Flutter app](https://firebase.google.com/docs/flutter/setup)
+    *   See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for a step-by-step guide on connecting this SDK to your Firebase project.
 
 ## Usage
 
@@ -34,15 +35,15 @@ import 'package:flutter_firebase_auth_sdk/flutter_firebase_auth_sdk.dart';
 // ...
 
 AuthScreen(
-  config: AuthConfig(
-    enableEmailPassword: true,
-    enableGoogle: true,
-    enableApple: true,
-  ),
-  authService: FirebaseAuthService(), // Or MockAuthService() for testing
-  onAuthSuccess: () {
-    print("User authenticated!");
-  },
+config: AuthConfig(
+enableEmailPassword: true,
+enableGoogle: true,
+enableApple: true,
+),
+authService: FirebaseAuthService(), // Or MockAuthService() for testing
+onAuthSuccess: () {
+print("User authenticated!");
+},
 );
 ```
 
@@ -53,42 +54,139 @@ final authService = FirebaseAuthService();
 
 // Sign In
 try {
-  await authService.signInWithEmailAndPassword(
-    email: 'test@example.com', 
-    password: 'password'
-  );
+await authService.signInWithEmailAndPassword(
+email: 'test@example.com',
+password: 'password'
+);
 } on AuthException catch (e) {
-  print(e.message);
+print(e.message);
 }
 
 // Listen to state
 StreamBuilder<AuthState>(
-  stream: authService.authStateChanges,
-  builder: (context, snapshot) {
-    if (snapshot.data?.status == AuthStatus.authenticated) {
-      return HomePage();
-    }
-    return LoginPage();
-  },
+stream: authService.authStateChanges,
+builder: (context, snapshot) {
+if (snapshot.data?.status == AuthStatus.authenticated) {
+return HomePage();
+}
+return LoginPage();
+},
 );
 ```
 
 ## Error Handling
 
-The SDK maps Firebase errors to specific exceptions:
 
-*   `InvalidCredentialsException`: Wrong email/password.
-*   `UserNotFoundException`: User does not exist.
-*   `EmailAlreadyInUseException`: Email already registered.
-*   `WeakPasswordException`: Password is too weak.
-*   `NetworkException`: Network connectivity issues.
+##  Flexible Error Handling - Your Way!
 
-##Screenshot
+This SDK gives you **complete control** over how you handle authentication errors. Every error includes rich metadata so you can customize your error handling exactly how you want.
 
+### What You Get With Every Error
 
-<img width="75" height="150" alt="pc1" src="https://github.com/user-attachments/assets/365fdafb-806c-45c9-91fe-87a207a7784f?raw=true" />
-<img width="85" height="153" alt="pc2" src="https://github.com/user-attachments/assets/491280a4-c375-4c26-b9cb-30f54fe4af92?raw=true" />
-<img width="89" height="151" alt="pc3" src="https://github.com/user-attachments/assets/feede630-104c-422e-85bc-d2e4a86fa1dc?raw=true" />
+\`\`\`dart
+try {
+await authService.signInWithEmail(email: email, password: password);
+} on AuthException catch (e) {
+// Access rich error information
+print(e.errorType);        // AuthErrorType enum (invalid_email, weak_password, etc.)
+print(e.severity);         // AuthErrorSeverity (critical, error, warning, info)
+print(e.message);          // User-friendly message
+print(e.code);             // Error code for programmatic handling
+print(e.originalError);    // Original Firebase error
+print(e.metadata);         // Additional context
+print(e.stackTraceString); // Full stack trace
+}
+\`\`\`
 
+### Handle Errors YOUR Way
 
+**1. Show a Dialog**
+\`\`\`dart
+try {
+await authService.signInWithEmail(email: email, password: password);
+} on AuthException catch (e) {
+showDialog(
+context: context,
+builder: (context) => AlertDialog(
+title: Text('Authentication Error'),
+content: Text(e.message),
+actions: [
+TextButton(
+onPressed: () => Navigator.pop(context),
+child: Text('OK'),
+),
+],
+),
+);
+}
+\`\`\`
 
+**2. Show a Snackbar**
+\`\`\`dart
+try {
+await authService.signInWithEmail(email: email, password: password);
+} on AuthException catch (e) {
+ScaffoldMessenger.of(context).showSnackBar(
+SnackBar(
+content: Text(e.message),
+backgroundColor: e.severity == AuthErrorSeverity.critical
+? Colors.red
+: Colors.orange,
+),
+);
+}
+\`\`\`
+
+**3. Show a Bottom Sheet**
+\`\`\`dart
+try {
+await authService.signInWithEmail(email: email, password: password);
+} on AuthException catch (e) {
+showModalBottomSheet(
+context: context,
+builder: (context) => Container(
+padding: EdgeInsets.all(16),
+child: Column(
+mainAxisSize: MainAxisSize.min,
+children: [
+Icon(Icons.error_outline, size: 48, color: Colors.red),
+SizedBox(height: 16),
+Text(e.message, style: TextStyle(fontSize: 16)),
+SizedBox(height: 16),
+ElevatedButton(
+onPressed: () => Navigator.pop(context),
+child: Text('Got it'),
+),
+],
+),
+),
+);
+}
+\`\`\`
+
+**4. Custom Toast/Banner**
+\`\`\`dart
+try {
+await authService.signInWithEmail(email: email, password: password);
+} on AuthException catch (e) {
+// Use your favorite toast library
+Fluttertoast.showToast(
+msg: e.message,
+backgroundColor: e.severity == AuthErrorSeverity.critical ? Colors.red : Colors.orange,
+);
+}
+\`\`\`
+
+**5. Navigate to Error Page**
+\`\`\`dart
+try {
+await authService.signInWithEmail(email: email, password: password);
+} on AuthException catch (e) {
+Navigator.push(
+context,
+MaterialPageRoute(
+builder: (context) => ErrorPage(exception: e),
+),
+);
+}
+\`\`\`

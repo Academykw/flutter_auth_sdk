@@ -1,5 +1,6 @@
+import 'package:arc_firebase_auth_sdk/arc_firebase_auth_sdk.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_auth_sdk/flutter_firebase_auth_sdk.dart';
+
 
 class HeadlessModePage extends StatefulWidget {
   const HeadlessModePage({super.key});
@@ -12,7 +13,7 @@ class _HeadlessModePageState extends State<HeadlessModePage> {
   final AuthService _authService = MockAuthService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
+  
   String? _statusMessage;
   bool _isLoading = false;
 
@@ -84,69 +85,106 @@ class _HeadlessModePageState extends State<HeadlessModePage> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    color: Colors.grey.shade200,
-                    child: Text('Current State: ${state?.status.name}\nUser: ${state?.user ?? "None"}'),
-                  ),
-                  if (_statusMessage != null) ...[
-                    const SizedBox(height: 16),
-                    Text(_statusMessage!, style: const TextStyle(color: Colors.red)),
-                  ],
-                  const SizedBox(height: 24),
-                  if (isAuthenticated) ...[
-                    ElevatedButton(
-                      onPressed: () => _authService.signOut(),
-                      child: const Text('Sign Out'),
-                    ),
-                  ] else ...[
-                    TextField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(labelText: 'Email'),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _passwordController,
-                      decoration: const InputDecoration(labelText: 'Password'),
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _signIn,
-                            child: _isLoading ? const CircularProgressIndicator() : const Text('Custom Sign In'),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: _isLoading ? null : () {
-                              _authService.signInWithGoogle();
-                            },
-                            child: const Text('Custom Google'),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _signUp,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueGrey,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('Custom Sign Up'),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text('Mock Credentials: test@example.com / password',
-                        style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey)),
-                  ],
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  color: Colors.grey.shade200,
+                  child: Text('Current State: ${state?.status.name}\nUser: ${state?.user ?? "None"}'),
+                ),
+                if (_statusMessage != null) ...[
+                   const SizedBox(height: 16),
+                   Text(_statusMessage!, style: const TextStyle(color: Colors.red)),
                 ],
-              ),
+                const SizedBox(height: 24),
+                if (isAuthenticated) ...[
+                  ElevatedButton(
+                    onPressed: () => _authService.signOut(),
+                    child: const Text('Sign Out'),
+                  ),
+                ] else ...[
+                  TextField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(labelText: 'Password'),
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _signIn,
+                          child: _isLoading ? const CircularProgressIndicator() : const Text('Custom Sign In'),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _isLoading ? null : () async {
+                            // Simulate Google Account Picker
+                            final selectedAccount = await showDialog<String>(
+                              context: context,
+                              builder: (context) => SimpleDialog(
+                                title: const Text('Choose an account'),
+                                children: [
+                                  for (var i = 1; i <= 5; i++)
+                                    SimpleDialogOption(
+                                      onPressed: () {
+                                        Navigator.pop(context, 'user$i@gmail.com');
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                        child: Row(
+                                          children: [
+                                            const CircleAvatar(
+                                              backgroundColor: Colors.blue,
+                                              child: Text('U', style: TextStyle(color: Colors.white)),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Mock User $i', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                Text('user$i@gmail.com', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+
+                            if (selectedAccount != null) {
+                              _authService.signInWithGoogle();
+                            }
+                          },
+                          child: const Text('Custom Google'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _signUp,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('Custom Sign Up'),
+                  ),
+                  const SizedBox(height: 16),
+                   const Text('Mock Credentials: test@example.com / password', 
+                      style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey)),
+                ],
+              ],
+            ),
             ),
           );
         },
@@ -154,4 +192,3 @@ class _HeadlessModePageState extends State<HeadlessModePage> {
     );
   }
 }
-//

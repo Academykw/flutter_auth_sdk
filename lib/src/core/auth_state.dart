@@ -1,4 +1,3 @@
-/// Represents the current state of authentication
 enum AuthStatus {
   authenticated,
   unauthenticated,
@@ -8,7 +7,7 @@ enum AuthStatus {
 
 class AuthState {
   final AuthStatus status;
-  final dynamic user; // Using dynamic or a specific User wrapper if we decide to wrap Firebase User
+  final dynamic user;
   final String? errorMessage;
 
   const AuthState({

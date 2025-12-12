@@ -9,8 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_firebase_auth_sdk:
-    path: ../
+
+  arc_firebase_auth_sdk: ^0.0.1
 
 dev_dependencies:
   flutter_test:

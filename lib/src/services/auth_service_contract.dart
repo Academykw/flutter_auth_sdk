@@ -1,35 +1,49 @@
 import '../core/auth_config.dart';
 import '../core/auth_state.dart';
+import '../core/auth_error_handler.dart';
 
-/// Contract for Authentication Service
 abstract class AuthService {
-  /// Stream of auth state changes
   Stream<AuthState> get authStateChanges;
 
-  /// Current auth state
   AuthState get currentUser;
 
-  /// Sign in with Email and Password
   Future<void> signInWithEmailAndPassword({
     required String email,
     required String password,
+    AuthErrorHandler? errorHandler,
   });
 
-  /// Sign up with Email and Password
   Future<void> signUpWithEmailAndPassword({
+    required String email,
+    required String password,
+    AuthErrorHandler? errorHandler,
+  });
+
+  Future<void> signInWithGoogle({
+    AuthErrorHandler? errorHandler,
+  });
+
+  Future<void> signInWithApple({
+    AuthErrorHandler? errorHandler,
+  });
+
+  Future<void> signOut({
+    AuthErrorHandler? errorHandler,
+  });
+
+  Future<void> initialize(AuthConfig config);
+
+  Future<AuthResult<void>> signInWithEmailAndPasswordResult({
     required String email,
     required String password,
   });
 
-  /// Sign in with Google
-  Future<void> signInWithGoogle();
+  Future<AuthResult<void>> signUpWithEmailAndPasswordResult({
+    required String email,
+    required String password,
+  });
 
-  /// Sign in with Apple
-  Future<void> signInWithApple();
+  Future<AuthResult<void>> signInWithGoogleResult();
 
-  /// Sign out
-  Future<void> signOut();
-  
-  /// Initialize with configuration
-  Future<void> initialize(AuthConfig config);
+  Future<AuthResult<void>> signInWithAppleResult();
 }
