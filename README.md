@@ -83,7 +83,7 @@ This SDK gives you **complete control** over how you handle authentication error
 
 ### What You Get With Every Error
 
-\`\`\`dart
+```dart
 try {
 await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
@@ -96,12 +96,12 @@ print(e.originalError);    // Original Firebase error
 print(e.metadata);         // Additional context
 print(e.stackTraceString); // Full stack trace
 }
-\`\`\`
+```
 
 ### Handle Errors YOUR Way
 
 **1. Show a Dialog**
-\`\`\`dart
+```dart
 try {
 await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
@@ -119,10 +119,10 @@ child: Text('OK'),
 ),
 );
 }
-\`\`\`
+```
 
 **2. Show a Snackbar**
-\`\`\`dart
+```dart
 try {
 await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
@@ -135,10 +135,10 @@ backgroundColor: e.severity == AuthErrorSeverity.critical
 ),
 );
 }
-\`\`\`
+```
 
 **3. Show a Bottom Sheet**
-\`\`\`dart
+```dart
 try {
 await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
@@ -162,10 +162,10 @@ child: Text('Got it'),
 ),
 );
 }
-\`\`\`
+```
 
 **4. Custom Toast/Banner**
-\`\`\`dart
+```dart
 try {
 await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
@@ -175,10 +175,10 @@ msg: e.message,
 backgroundColor: e.severity == AuthErrorSeverity.critical ? Colors.red : Colors.orange,
 );
 }
-\`\`\`
+```
 
 **5. Navigate to Error Page**
-\`\`\`dart
+```dart
 try {
 await authService.signInWithEmail(email: email, password: password);
 } on AuthException catch (e) {
@@ -189,4 +189,4 @@ builder: (context) => ErrorPage(exception: e),
 ),
 );
 }
-\`\`\`
+```
