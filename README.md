@@ -17,8 +17,8 @@ A reusable Authentication SDK powered by Firebase that supports both a pre-built
 
 ```yaml
 dependencies:
-  flutter_firebase_auth_sdk:
-    path: path/to/flutter_firebase_auth_sdk
+  arc_firebase_auth_sdk: ^0.0.1
+
 ```
 
 2.  (Optional) For full Firebase support, ensure you have configured your Flutter app with Firebase:
